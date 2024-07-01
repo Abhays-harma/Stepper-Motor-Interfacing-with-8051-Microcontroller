@@ -1,0 +1,43 @@
+; 8051 Assembly code to control a stepper motor using ULN2003 driver
+
+; Define ports for motor control
+P1 equ 0x90   ; Port 1 for motor control (assuming P1.0 to P1.3 for IN1 to IN4 of ULN2003)
+
+; Define delay function (adjust based on motor speed and requirements)
+delay_ms MACRO ms
+    MOV R2, #ms
+delay_loop:
+    MOV R1, #250
+delay_inner:
+    DJNZ R1, delay_inner
+    DJNZ R2, delay_loop
+    ENDM
+
+; Main program
+ORG 0x0000
+    MOV P1, #0x00    ; Initialize P1 as output port for motor control
+
+main_loop:
+    ; Move stepper motor forward (clockwise)
+    MOV P1, #0x01    ; Phase 1: IN1 = 1
+    delay_ms 10      ; Adjust delay as needed
+    MOV P1, #0x02    ; Phase 2: IN2 = 1
+    delay_ms 10
+    MOV P1, #0x04    ; Phase 3: IN3 = 1
+    delay_ms 10
+    MOV P1, #0x08    ; Phase 4: IN4 = 1
+    delay_ms 10
+    
+    ; Move stepper motor backward (counter-clockwise)
+    MOV P1, #0x08    ; Phase 4: IN4 = 1
+    delay_ms 10
+    MOV P1, #0x04    ; Phase 3: IN3 = 1
+    delay_ms 10
+    MOV P1, #0x02    ; Phase 2: IN2 = 1
+    delay_ms 10
+    MOV P1, #0x01    ; Phase 1: IN1 = 1
+    delay_ms 10
+    
+    SJMP main_loop   ; Repeat indefinitely
+
+    END
